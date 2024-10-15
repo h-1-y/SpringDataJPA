@@ -8,3 +8,8 @@
 # 2024. 10. 14
 - 순수 JPA 기반 레퍼지토리 만들기
 - SpringDataJPA 공통 인터페이스
+
+# 2024. 10. 15
+- 메소드 이름으로 쿼리 생성
+- JPA NamedQuery
+- @Query
