@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQuery;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,11 @@ import lombok.ToString;
 // 기본 생성자
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "username", "age"})
+// 네임드 쿼리
+@NamedQuery(
+			  name = "Member.findByUsername"
+			, query = "select m from Member m where m.username = :username"
+		)
 public class Member {
 
 	@Id
@@ -41,6 +47,11 @@ public class Member {
 		team.getMembers().add(this);
 	}
 
+	public Member(String username, int age) {
+		this.username = username;
+		this.age = age;
+	}
+	
 	public Member(String username, int age, Team team) {
 		this.username = username;
 		this.age = age;
