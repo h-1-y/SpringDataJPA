@@ -9,6 +9,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import spring.data.jpa.entity.Member;
 
+// 순수 JPA 
+
 @Repository
 public class MemberJpaRepository {
 
@@ -57,6 +59,22 @@ public class MemberJpaRepository {
 	
 	public List<Member> findByUsername(String username) {
 		return em.createNamedQuery("Member.findByUsername", Member.class).setParameter("username", username).getResultList();
+	}
+	
+	// JPA Paging
+	public List<Member> findByPaging(int age, int offset, int limit) {
+		List<Member> result = em.createQuery("select m from Member m where m.age = :age order by m.username desc", Member.class)
+								.setParameter("age", age)
+								.setFirstResult(offset)
+								.setMaxResults(limit)
+								.getResultList();
+		return result;
+	}
+	
+	public long totalCount(int age) {
+		return em.createQuery("select count(m) from Member m where m.age = :age", Long.class)
+				 .setParameter("age", age)
+				 .getSingleResult();
 	}
 	
 }

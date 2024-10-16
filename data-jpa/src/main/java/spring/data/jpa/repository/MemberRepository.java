@@ -1,13 +1,19 @@
 package spring.data.jpa.repository;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import spring.data.jpa.dto.MemberDTO;
 import spring.data.jpa.entity.Member;
+
+// SpringDataJPA
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -34,5 +40,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	
 	@Query("select m from Member m where m.username in :names")
 	List<Member> findByNames(@Param("names") List<String> names);
+	
+	// 다양한 반환 타입 가능 
+	List<Member> findListByUsername(String username);
+	Member findMemberByUsername(String username);
+	Optional<Member> findOptionalByUsername(String username);
+	
+	
+	// SpringDataJPA Paging
+	
+	// 페이징 메소드 생성시 리스트 쿼리와 카운트 쿼리를 나눌수 있음 (카운트 쿼리는 조인테이블이 where절에 있지 않은 이상 조인이 필요하지 않기때문에 제공하는 기능인듯)
+	// @Query(value = "select m from Member m left join m.team t", countQuery = "select count(m) from Member m")
+	Page<Member> findByAge(int age, Pageable pageable);
+	// 비동기처리시 사용 (ex. 더보기, 스크롤 페이징 등등)
+	Slice<Member> findSliceByAge(int age, Pageable pageable);
 	
 }
