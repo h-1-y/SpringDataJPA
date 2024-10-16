@@ -14,7 +14,7 @@ import spring.data.jpa.entity.Member;
 
 @SpringBootTest
 @Transactional
-@Rollback(true)
+@Rollback(false)
 class MemberJpaRepositoryTest {
 
 	@Autowired
@@ -127,6 +127,23 @@ class MemberJpaRepositoryTest {
 		// then
 		assertThat(result.size()).isEqualTo(3);
 		assertThat(totalCount).isEqualTo(10);
+		
+	}
+	
+	@Test
+	public void bulkAgePlus() {
+		
+		// given
+		memberJpaRepository.save(new Member("member1", 10));
+		memberJpaRepository.save(new Member("member2", 20));
+		memberJpaRepository.save(new Member("member3", 30));
+		memberJpaRepository.save(new Member("member4", 40));
+		memberJpaRepository.save(new Member("member5", 50));
+		
+		// when
+		int resultCount = memberJpaRepository.bulkAgePlus(30);
+		
+		assertThat(resultCount).isEqualTo(3);
 		
 	}
 	

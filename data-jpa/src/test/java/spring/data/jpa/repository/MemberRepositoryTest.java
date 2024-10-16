@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
 import spring.data.jpa.dto.MemberDTO;
 import spring.data.jpa.entity.Member;
 import spring.data.jpa.entity.Team;
@@ -31,6 +32,9 @@ class MemberRepositoryTest {
 	
 	@Autowired
 	TeamRepository teamRepository;
+	
+	@Autowired
+	EntityManager em;
 	
 	@Test
 	void test() {
@@ -220,7 +224,6 @@ class MemberRepositoryTest {
 		PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
 		
 		// when 
-//		Page<Member> page = memberRepository.findByAge(age, pageRequest);
 		Page<Member> page = memberRepository.findByAge(age, pageRequest);
 		
 		// DTO 변환 
@@ -276,6 +279,106 @@ class MemberRepositoryTest {
 		assertThat(page.getNumber()).isEqualTo(0);
 		assertThat(page.isFirst()).isTrue();
 		assertThat(page.hasNext()).isTrue();
+		
+	}
+	
+	@Test
+	public void bulkAgePlus() {
+		
+		// given
+		memberRepository.save(new Member("member1", 10));
+		memberRepository.save(new Member("member2", 20));
+		memberRepository.save(new Member("member3", 30));
+		memberRepository.save(new Member("member4", 40));
+		memberRepository.save(new Member("member5", 50));
+		
+		// when
+		int resultCount = memberRepository.bulkAgePlus(30);
+		
+		// 벌크성 쿼리의 경우 persist된 객체를 무시하고 디비에 다이렉트로 쿼리를 날리기 때문에 persist된 객체는 이 사실을 모른다.
+		Member findMember = memberRepository.findMemberByUsername("member5");
+		// persist된 객체는 그대로 50살이지만 DB상의 데이터는 51로 업데이트 된 상황
+		System.out.println("flush 전 ======== " + findMember.getAge());
+		
+		// 때문에 persist된 객체를 flush 해주어야 한다.
+		// 하지만 이 과정을 @Modifying 어노테이션의 clearAutomatically = true 옵션으로 해결 가능
+		em.flush();
+		em.clear();
+		
+		findMember = memberRepository.findMemberByUsername("member5");
+		System.out.println("flush 후 ======== " + findMember.getAge());
+		
+		assertThat(resultCount).isEqualTo(3);
+		
+	}
+	
+	@Test
+	public void findMemberLazy() {
+		
+		// given
+		// member1 -> teamA
+		// member2 -> teamB
+		Team teamA = new Team("team A");
+		Team teamB = new Team("team B");
+		
+		teamRepository.save(teamA);
+		teamRepository.save(teamB);
+		
+		memberRepository.save(new Member("member1", 10, teamA));
+		memberRepository.save(new Member("member2", 20, teamB));
+		
+		em.flush();
+		em.clear();
+		
+		List<Member> result = memberRepository.findAll();
+		
+		// fetch join
+//		List<Member> result = memberRepository.findMemberFetchJoin();
+		// EntityGraph - JPQL X
+//		List<Member> result = memberRepository.findAll();
+		// EntityGraph + JPQL
+//		List<Member> result = memberRepository.findMemberEntityGraph();
+		// 메소드 이름 활용 EntityGraph
+//		List<Member> result = memberRepository.findEntityGraphByUsername("member1");
+		// NamedEntityGraph
+//		List<Member> result = memberRepository.findNamedEntityGraphByAge(10);
+		
+		for ( Member m : result ) {
+			System.out.println("member ===== " + m.getUsername());
+			System.out.println("teamClass ===== " + m.getTeam().getClass());
+			System.out.println("m.getTeam().getName() ==== " + m.getTeam().getName());
+		}
+		
+	}
+	
+	@Test
+	public void queryHint() {
+		
+		memberRepository.save(new Member("member1", 10));		
+		
+		em.flush();
+		em.clear();
+		
+		// @QueryHints 사용으로 변경감지가 일어나지 않는다.
+		Member findMember = memberRepository.findReadOnlyByUsername("member1");
+		findMember.setUsername("member2");
+		
+		em.flush();
+		
+	}
+	
+	@Test
+	public void lock() {
+		
+		memberRepository.save(new Member("member1", 10));		
+		
+		em.flush();
+		em.clear();
+		
+		// @Lock
+		// ~ for update
+		List<Member> findMember = memberRepository.findLockByUsername("member1");
+		
 		
 	}
 	

@@ -6,10 +6,16 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import spring.data.jpa.dto.MemberDTO;
 import spring.data.jpa.entity.Member;
 
@@ -54,5 +60,47 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	Page<Member> findByAge(int age, Pageable pageable);
 	// 비동기처리시 사용 (ex. 더보기, 스크롤 페이징 등등)
 	Slice<Member> findSliceByAge(int age, Pageable pageable);
+	
+	
+	// 벌크성 수정 쿼리
+	
+	@Modifying // <- 해당 어노테이션이 있어야 executeUpdate를 호출 (clearAutomatically = true) <- 업데이트 쿼리 후 자동으로 clear
+	@Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+	int bulkAgePlus(@Param("age") int age);
+	
+	@Query("select m from Member m left join fetch m.team")
+	List<Member> findMemberFetchJoin();
+	
+	
+	// EntityGraph
+	
+	@Override
+	// @EntityGraph 사용시 attributePaths 옵션을 사용하여 fetch join이 가능 JPQL 작성 X
+	@EntityGraph(attributePaths = {"team"})
+	List<Member> findAll();
+	
+	// 둘이 같이 사용하는것도 가능
+	@Query("select m from Member m")
+	@EntityGraph(attributePaths = {"team"})
+	List<Member> findMemberEntityGraph();
+	
+	// 메소드 이름을 활용해서도 가능
+	@EntityGraph(attributePaths = {"team"})
+	List<Member> findEntityGraphByUsername(@Param("username") String username);
+	
+	// @NamedEntityGraph 
+	@EntityGraph("Member.all")
+	List<Member> findNamedEntityGraphByAge(@Param("age") int age);
+	
+	
+	// JPA Hint
+	// 읽기 전용을 만들어버린다. set 등을 통해서 변경감지가 일어나는 일을 방지함
+	@QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+	Member findReadOnlyByUsername(String username);
+	
+	
+	// JPA Lock
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	List<Member> findLockByUsername(String username);
 	
 }
