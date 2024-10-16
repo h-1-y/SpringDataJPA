@@ -13,3 +13,10 @@
 - 메소드 이름으로 쿼리 생성
 - JPA NamedQuery
 - @Query
+
+# 2024. 10. 16
+- 순수 JPA Paging
+- SpringDataJPA Paging
+- 벌크성 수정 쿼리
+- @EntityGraph
+- JPA Hint & Lock
