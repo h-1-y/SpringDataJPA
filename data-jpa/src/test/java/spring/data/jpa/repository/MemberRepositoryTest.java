@@ -382,4 +382,12 @@ class MemberRepositoryTest {
 		
 	}
 	
+	// 사용자 정의 레포지토리 호출
+	@Test
+	public void customRepository() {
+		
+		List<Member> result = memberRepository.findMemberCustom();
+		
+	}
+	
 }
