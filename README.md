@@ -20,3 +20,7 @@
 - 벌크성 수정 쿼리
 - @EntityGraph
 - JPA Hint & Lock
+
+# 2024. 10. 17
+- 사용자 정의 레퍼지토리 구현
+- Auditing
