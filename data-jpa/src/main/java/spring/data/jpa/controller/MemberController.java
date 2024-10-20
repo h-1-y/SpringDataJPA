@@ -41,9 +41,9 @@ public class MemberController {
 		return map;
 	}
 	
-	@PostConstruct
-	public void init() {
-		for ( int i=1; i<=100; i++ ) memberRepository.save(new Member("member" + i, i));
-	}
+//	@PostConstruct
+//	public void init() {
+//		for ( int i=1; i<=100; i++ ) memberRepository.save(new Member("member" + i, i));
+//	}
 	
 }
