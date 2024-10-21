@@ -32,3 +32,9 @@
 # 2024. 10. 20
 - 스프링 데이터 JPA 구현체 분석
 - 새로운 엔티티를 구별하는 방법
+
+# 2024. 10. 21
+- Specifications (명세)
+- Query By Example
+- projections
+- Native Query
