@@ -10,6 +10,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -411,6 +413,39 @@ class MemberRepositoryTest {
 		List<Member> members = memberRepository.findAll(spec);
 		
 		assertThat(members.size()).isEqualTo(1);
+		
+	}
+	
+	
+	// Query By Example
+	@Test
+	public void queryByExample() {
+		
+		Team teamA = new Team("teamA");
+		em.persist(teamA);
+		
+		Member member1 = new Member("member1", 10, teamA);
+		Member member2 = new Member("member2", 20, teamA);
+		
+		em.persist(member1);
+		em.persist(member2);
+		
+		em.flush();
+		em.clear();
+		
+		// Probe 생성
+		Member member = new Member("member1");
+		Team team = new Team("teamA");
+		
+		member.setTeam(team);
+		
+		ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("age");
+		Example<Member> example = Example.of(member, matcher);
+		
+		List<Member> result = memberRepository.findAll(example);
+		
+		assertThat(result.get(0).getUsername()).isEqualTo("member1");
+		assertThat(result.size()).isEqualTo(1);
 		
 	}
 	
