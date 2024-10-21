@@ -449,4 +449,70 @@ class MemberRepositoryTest {
 		
 	}
 	
+	
+	// 인터페이스 기반 Projections
+	@Test
+	public void projections() {
+		
+		Team teamA = new Team("teamA");
+		em.persist(teamA);
+		
+		Member member1 = new Member("member1", 10, teamA);
+		Member member2 = new Member("member2", 20, teamA);
+		
+		em.persist(member1);
+		em.persist(member2);
+		
+		em.flush();
+		em.clear();
+		
+		List<UsernameOnly> result = memberRepository.findProjectionsByUsername("member1");
+		
+		for ( UsernameOnly usernameOnly : result ) System.out.println("usernameOnly ===== " + usernameOnly.getUsername());
+		
+	}
+	
+	// 클래스 기반 Projections
+//	@Test
+//	public void projectionsForDto() {
+//		
+//		Team teamA = new Team("teamA");
+//		em.persist(teamA);
+//		
+//		Member member1 = new Member("member1", 10, teamA);
+//		Member member2 = new Member("member2", 20, teamA);
+//		
+//		em.persist(member1);
+//		em.persist(member2);
+//		
+//		em.flush();
+//		em.clear();
+//		
+//		List<UsernameOnly2> result = memberRepository.findProjections2oByUsername("member1");
+//		
+//		for ( UsernameOnly2 usernameOnly : result ) System.out.println("usernameOnly ===== " + usernameOnly.getUsername());
+//		
+//	}
+	
+	@Test
+	public void projections2() {
+		
+		Team teamA = new Team("teamA");
+		em.persist(teamA);
+		
+		Member member1 = new Member("member1", 10, teamA);
+		Member member2 = new Member("member2", 20, teamA);
+		
+		em.persist(member1);
+		em.persist(member2);
+		
+		em.flush();
+		em.clear();
+		
+		List<NestedClosedProjections> result = memberRepository.findProjectionsByUsername("member1", NestedClosedProjections.class);
+		
+		for ( NestedClosedProjections usernameOnly : result ) System.out.println("usernameOnly ===== " + usernameOnly.getUsername());
+		
+	}
+	
 }
